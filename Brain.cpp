@@ -49,6 +49,7 @@ void Brain::loadNDB(const char *address_ndb){
             progress++;
             cout << string( size_bar-progress+2,'\b' );
             cout << '=' << string( size_bar-progress,' ' ) <<']';
+            cout.flush();
         }
 
     }//i loop
