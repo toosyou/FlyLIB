@@ -5,6 +5,7 @@
 #include <fstream>
 #include <iostream>
 #include <dirent.h>
+#include <stdlib.h>
 
 #include "Neuron.h"
 #include "Neuropil.h"

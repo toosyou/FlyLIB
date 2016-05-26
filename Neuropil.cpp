@@ -1,6 +1,6 @@
 #include "Neuropil.h"
 
-#define INFINITY (INT_MAX-1000)
+//#define INFINITY (INT_MAX-1000)
 
 Neuropil::Neuropil(const char *address_am){
 

@@ -2,7 +2,7 @@
 #define PCA_H
 
 #include <iostream>
-#include <math.h>
+#include <cmath>
 
 using namespace std;
 
@@ -58,9 +58,9 @@ T getMax(T** Input,const int N,int &nRow,int &nCol)
     for(int i=0;i<N;++i)
         for(int j=0;j<N;++j)
             if(i!=j)
-                if( abs(Input[i][j]) > rMax )
+                if( std::abs(Input[i][j]) > rMax )
                 {
-                    rMax = abs(Input[i][j]);
+                    rMax = std::abs(Input[i][j]);
                     nRow = i ;
                     nCol = j ;
                 }
@@ -189,8 +189,8 @@ T** PCA(T** Data,const int M,const int N, const bool Points_Vectors = true ,cons
     delete [] TempEigenVector;
 
     //Delete All the stuffs
-    delete Average ;
-    delete EigenValue ;
+    delete [] Average ;
+    delete [] EigenValue ;
 
     for(int i=0;i<N;++i)
         delete [] TempData[i];

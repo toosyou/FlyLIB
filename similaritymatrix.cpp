@@ -1,4 +1,5 @@
 #include "similaritymatrix.h"
+#include "Cluster.h"
 
 SimilarityMatrix::SimilarityMatrix( const char* address ){
     load(address);
@@ -62,6 +63,7 @@ void SimilarityMatrix::load(const char *address){
     mtx_in.close();
     return;
 }
+
 
 SuperCluster* SimilarityMatrix::clustering(float threshold, int min_size){
     /*Using BFS for the time being.

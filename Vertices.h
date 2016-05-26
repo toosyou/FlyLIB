@@ -6,7 +6,7 @@
 #include <vector>
 #include <fstream>
 #include <iostream>
-#include <GL/gl.h>
+//#include <GL/gl.h>
 
 using namespace std;
 
