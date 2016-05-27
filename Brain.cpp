@@ -38,22 +38,25 @@ void Brain::loadNDB(const char *address_ndb){
     ndb_strm >> amount_neuron;
 
     int size_bar = 40;
-    int progress = 0;
+    //int progress = 0;
     int step_bar = amount_neuron / size_bar;
-    cout << "Loading Neuron Database\t[" <<string(size_bar,' ')<<']';
+    //cout << "Loading Neuron Database\t[" <<string(size_bar,' ')<<']';
 
+    progressbar *progress = progressbar_new("Loading NDB", amount_neuron);
     for(int i=0;i<amount_neuron;++i){
         neurons_.push_back( Neuron(ndb_strm) );
 
-        if( (i+1) % step_bar == 0 ){
+        progressbar_inc(progress);
+        /*if( (i+1) % step_bar == 0 ){
             progress++;
             cout << string( size_bar-progress+2,'\b' );
             cout << '=' << string( size_bar-progress,' ' ) <<']';
             cout.flush();
-        }
+        }*/
 
     }//i loop
-    cout <<endl;
+    //cout <<endl;
+    progressbar_finish(progress);
 
     ndb_strm.close();
 }

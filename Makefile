@@ -1,17 +1,14 @@
 CXX = g++-5
-CXXFLAGS = 
+CXXFLAGS = -Lprogressbar/ -lprogressbar
 
-all: Brain.o Cluster.o Neuron.o Neuropil.o Segment.o Vertices.o
+all: progressbar/libprogressbar.a Brain.o Cluster.o Neuron.o Neuropil.o Segment.o Vertices.o
 	mkdir -p lib
-	#ar rcs libBrain.a Brain.o
-	#ar rcs libCluster.a Cluster.o
-	#ar rcs libNeuron.a Neuron.o
-	#ar rcs libNeuropil.a Neuropil.o
-	#ar rcs libSegment.a Segment.o
-	#ar rcs libVertices.a Vertices.o
 	ar rcs libFly.a Brain.o Cluster.o Neuron.o Neuropil.o Segment.o Vertices.o
 	mv *.a lib/
 	rm -f *.o
+
+progressbar/libprogressbar.a:
+	make -C progressbar
 
 Brain.o: Brain.cpp Brain.h
 	$(CXX) $(CXXFLAGS) -c Brain.cpp -o $@
@@ -27,9 +24,6 @@ Neuropil.o: Neuropil.cpp Neuropil.h
 
 Segment.o: Segment.cpp Segment.h
 	$(CXX) $(CXXFLAGS) -c Segment.cpp -o $@
-
-#similaritymatrix.o: similaritymatrix.cpp similaritymatrix.h
-	#$(CXX) $(CXXFLAGS) -c similaritymatrix.cpp -o $@
 
 Vertices.o: Vertices.cpp Vertices.h
 	$(CXX) $(CXXFLAGS) -c Vertices.cpp -o $@

@@ -9,6 +9,8 @@
 
 #include "Neuron.h"
 #include "Neuropil.h"
+#include "progressbar/include/progressbar.h"
+#include "progressbar/include/statusbar.h"
 
 using namespace std;
 
