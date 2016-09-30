@@ -1,5 +1,5 @@
-CXX = g++-5
-CXXFLAGS = -Lprogressbar/ -lprogressbar
+CXX = g++-6
+CXXFLAGS = -Lprogressbar/ -lprogressbar -lncurses
 
 all: progressbar/libprogressbar.a Brain.o Cluster.o Neuron.o Neuropil.o Segment.o Vertices.o
 	mkdir -p lib

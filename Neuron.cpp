@@ -1,6 +1,6 @@
 #include "Neuron.h"
 
-void Neuron::cal_tips_(){
+void Neuron::cal_tips_branches(){
 
     vector<int> counter(this->original_vertices_->size(),0);
 
@@ -12,11 +12,13 @@ void Neuron::cal_tips_(){
     }
 
     for(int i=0;i<counter.size();++i){
-        if(counter[i] == 1){
+        if(counter[i] == 1){ // it's a tip
             this->index_vertices_tips_original_.push_back(i);
         }
+        else if(counter[i] > 2){ // it's a branch point
+            this->index_vertices_branches_original_.push_back(i);
+        }
     }
-
 
 }
 
@@ -103,7 +105,7 @@ void Neuron::load_from_strm_(fstream &neuron_strm){
 Neuron::Neuron(fstream &neuron_strm){
 
     load_from_strm_(neuron_strm);
-    cal_tips_();
+    cal_tips_branches();
 
 }
 
@@ -118,6 +120,18 @@ vector< vector<float> > Neuron::tips_original(){
 
     return tips;
 
+}
+
+vector<vector<float> > Neuron::branches_original(){
+
+    vector<vector<float> > branches;
+
+    for(int i=0;i<index_vertices_branches_original_.size();++i){
+        int index_vertices = index_vertices_branches_original_[i];
+        branches.push_back( (*original_vertices_)[index_vertices] );
+    }
+
+    return branches;
 }
 
 vector< vector<float> > Neuron::pca(void){

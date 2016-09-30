@@ -16,6 +16,7 @@ class Neuron{
     vector<int> fork_paths_;                // removed paths that make no diff.
 
     vector<int> index_vertices_tips_original_;
+    vector<int> index_vertices_branches_original_;
 
     vector<float> max_;                     //( max_x , max_y , max_z )
     vector<float> min_;                     //( min_x , min_y , min_z )
@@ -25,7 +26,7 @@ class Neuron{
 
     int size_removed_paths_;
 
-    void cal_tips_(void);
+    void cal_tips_branches(void);
     void load_from_strm_(fstream &neuron_strm);
 
 
@@ -42,6 +43,7 @@ public:
     vector<Segment>& original_paths(void){return this->original_paths_;}
 
     vector<vector<float> > tips_original(void);//return the vertices of tips
+    vector<vector<float> > branches_original(void); // return the vertices of branch points
 
     vector< vector<float> > pca(void);
 
