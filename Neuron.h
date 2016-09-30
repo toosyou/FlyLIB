@@ -14,6 +14,7 @@ class Neuron{
     vector<Segment> modified_paths_;
     vector< vector<int> > removed_paths_;   // removed paths that make diff.
     vector<int> fork_paths_;                // removed paths that make no diff.
+    vector<int> soma_;
 
     vector<int> index_vertices_tips_original_;
     vector<int> index_vertices_branches_original_;

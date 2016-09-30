@@ -29,6 +29,7 @@ void Neuron::load_from_strm_(fstream &neuron_strm){
     int size_vertices = 0;
     int size_original_paths =0;
     int size_modified_paths =0;
+    this->soma_.resize(3, 0);
 
     neuron_strm >> buffer;
     if(buffer!="@0"){
@@ -50,13 +51,13 @@ void Neuron::load_from_strm_(fstream &neuron_strm){
     neuron_strm >> buffer_int;      //not used yet
     neuron_strm >> buffer;          //RemLines
     neuron_strm >> size_removed_paths_;
-    neuron_strm >> buffer;          //Soma
+    neuron_strm >> buffer >> soma_[0] >> soma_[1] >> soma_[2];          //Soma
     // Soma hasn't haven data yet.
 
     original_vertices_ = new Vertices(neuron_strm,size_vertices);
 
     neuron_strm >> buffer;          //@2
-    for(int i=0;i<size_original_paths;++i){
+    for(int i=0;i<size_original_paths/3;++i){
         original_paths_.push_back( Segment(neuron_strm,original_vertices_) );
     }
     neuron_strm >> buffer;          //@3
@@ -73,10 +74,12 @@ void Neuron::load_from_strm_(fstream &neuron_strm){
         }
     }
     neuron_strm >> buffer;          //@5
-    neuron_strm >> buffer_int;
-    while(buffer_int != -1){
-        fork_paths_.push_back(buffer_int);
+    if(size_modified_paths != 0 ){ // it's modified
         neuron_strm >> buffer_int;
+        while(buffer_int != -1){
+            fork_paths_.push_back(buffer_int);
+            neuron_strm >> buffer_int;
+        }
     }
     neuron_strm >> buffer;          //@6
     for(int i=0;i<size_modified_paths;++i){
