@@ -30,10 +30,12 @@ void Neuron::load_from_strm_(fstream &neuron_strm){
     int size_original_paths =0;
     int size_modified_paths =0;
     this->soma_.resize(3, 0);
+    int version_ndb = 2;
 
     neuron_strm >> buffer;
     if(buffer!="@0"){
         cerr << "******ERROR:LOCATION OF NEURON FSTREAM WRONG*******" <<endl;
+        cerr << buffer <<endl;
         return;
     }
     neuron_strm >> buffer;          //Neuron
@@ -52,15 +54,19 @@ void Neuron::load_from_strm_(fstream &neuron_strm){
     neuron_strm >> buffer;          //RemLines
     neuron_strm >> size_removed_paths_;
 
-    //read soma using getline for both version 1 and 2 of ndb
+    //read soma for both version 1 and 2 of ndb
+    neuron_strm.ignore(11, '\n');
     getline(neuron_strm, buffer);
-    getline(neuron_strm, buffer);
-    istringstream istrm(buffer);
-    istrm >> buffer;
-    int tmp_index_soma = 0;
-    while( istrm >> soma_[tmp_index_soma++]);
+    istringstream soma_strm(buffer);
+    soma_strm >> buffer;
+    for(int i=0;i<3;++i){
+        if( !(soma_strm >> soma_[i]) ){
+            version_ndb = 1;
+            break;
+        }
+    }
 
-    if(size_modified_paths == 0){ // for version 2 ndb
+    if(version_ndb == 2){ // for version 2 ndb
         size_original_paths /= 3;
     }
 
@@ -85,7 +91,7 @@ void Neuron::load_from_strm_(fstream &neuron_strm){
     }
 
     neuron_strm >> buffer;          //@5
-    if(size_modified_paths != 0 ){ // it's modified
+    if(version_ndb == 1){ // it's modified
         neuron_strm >> buffer_int;
         while(buffer_int != -1){
             fork_paths_.push_back(buffer_int);
