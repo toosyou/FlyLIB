@@ -51,13 +51,23 @@ void Neuron::load_from_strm_(fstream &neuron_strm){
     neuron_strm >> buffer_int;      //not used yet
     neuron_strm >> buffer;          //RemLines
     neuron_strm >> size_removed_paths_;
-    neuron_strm >> buffer >> soma_[0] >> soma_[1] >> soma_[2];          //Soma
-    // Soma hasn't haven data yet.
+
+    //read soma using getline for both version 1 and 2 of ndb
+    getline(neuron_strm, buffer);
+    getline(neuron_strm, buffer);
+    istringstream istrm(buffer);
+    istrm >> buffer;
+    int tmp_index_soma = 0;
+    while( istrm >> soma_[tmp_index_soma++]);
+
+    if(size_modified_paths == 0){ // for version 2 ndb
+        size_original_paths /= 3;
+    }
 
     original_vertices_ = new Vertices(neuron_strm,size_vertices);
 
     neuron_strm >> buffer;          //@2
-    for(int i=0;i<size_original_paths/3;++i){
+    for(int i=0;i<size_original_paths;++i){
         original_paths_.push_back( Segment(neuron_strm,original_vertices_) );
     }
     neuron_strm >> buffer;          //@3
@@ -73,6 +83,7 @@ void Neuron::load_from_strm_(fstream &neuron_strm){
             neuron_strm >> buffer_int;
         }
     }
+
     neuron_strm >> buffer;          //@5
     if(size_modified_paths != 0 ){ // it's modified
         neuron_strm >> buffer_int;
@@ -103,6 +114,7 @@ void Neuron::load_from_strm_(fstream &neuron_strm){
         modified_paths_[i].setCenter(temp_center);
         modified_paths_[i].setModified(true);
     }
+
 }
 
 Neuron::Neuron(fstream &neuron_strm){

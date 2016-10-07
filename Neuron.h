@@ -4,6 +4,7 @@
 #include "Segment.h"
 #include "Vertices.h"
 #include "PCA.h"
+#include <sstream>
 
 class Neuron{
 

@@ -3,20 +3,25 @@ import numpy as np
 
 class NeuronRaw:
 
-    def __init__(self, address_am):
-        self.read_from_am(address_am)
+    def __init__(self, address_am=None):
+        self.intensity = np.ndarray(shape=(0), dtype=float)
+        self.valid = False
+        if address_am:
+            self.valid = self.read_from_am(address_am)
 
     def read_from_am(self, address_am):
         # open the file
-        self._am_info = list()
-        in_am = open(address_am, 'r')
+        try:
+            in_am = open(address_am, 'r')
+        except IOError:
+            return False
+
         line = str()
         times_at_one = 0
 
         # read information
         while line != False:
             line = in_am.readline()
-            self._am_info.append(line)
 
             # get the size of volume
             if 'define Lattice' in line:
@@ -41,7 +46,7 @@ class NeuronRaw:
                     break
 
         # resize intensity
-        self._intensity = np.ndarray(shape=(self._size[0],
+        self.intensity = np.ndarray(shape=(self._size[0],
                                             self._size[1],
                                             self._size[2]),
                                      dtype=np.uint16)
@@ -50,10 +55,11 @@ class NeuronRaw:
         for z in range(self._size[2]):
             for y in range(self._size[1]):
                 for x in range(self._size[0]):
-                    self._intensity[x][y][z] = np.uint16(
+                    self.intensity[x][y][z] = np.uint16(
                         int(in_am.readline()))
 
         in_am.close()
+        return True
 
     def write_am(self, address_am):
         am_out = open(address_am, 'w')
@@ -80,6 +86,6 @@ class NeuronRaw:
         for z in range(self._size[2]):
             for y in range(self._size[1]):
                 for x in range(self._size[0]):
-                    am_out.write('%d \n' % (self._intensity[x][y][z]))
+                    am_out.write('%d \n' % (self.intensity[x][y][z]))
 
         am_out.close()
