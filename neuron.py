@@ -4,8 +4,15 @@ import numpy as np
 class NeuronRaw:
 
     def __init__(self, address_am=None):
-        self.intensity = np.ndarray(shape=(0), dtype=float)
+        self.intensity = np.ndarray(shape=(0), dtype=np.uint16)
         self.valid = False
+        self.size = [0, 0, 0]
+        self._x_min = 0
+        self._x_max = 0
+        self._y_min = 0
+        self._y_max = 0
+        self._z_min = 0
+        self._z_max = 0
         if address_am:
             self.valid = self.read_from_am(address_am)
 
@@ -25,7 +32,7 @@ class NeuronRaw:
 
             # get the size of volume
             if 'define Lattice' in line:
-                self._size = list(map(int, line.split()[2:]))
+                self.size = list(map(int, line.split()[2:]))
                 continue
 
             # get the boundingbox
@@ -46,15 +53,15 @@ class NeuronRaw:
                     break
 
         # resize intensity
-        self.intensity = np.ndarray(shape=(self._size[0],
-                                            self._size[1],
-                                            self._size[2]),
+        self.intensity = np.ndarray(shape=(self.size[0],
+                                            self.size[1],
+                                            self.size[2]),
                                      dtype=np.uint16)
 
         # read intensity
-        for z in range(self._size[2]):
-            for y in range(self._size[1]):
-                for x in range(self._size[0]):
+        for z in range(self.size[2]):
+            for y in range(self.size[1]):
+                for x in range(self.size[0]):
                     self.intensity[x][y][z] = np.uint16(
                         int(in_am.readline()))
 
@@ -67,12 +74,12 @@ class NeuronRaw:
         # output parameters
         am_out.write('# AmiraMesh 3D ASCII 2.0\n\n\n')
         am_out.write('define Lattice %d %d %d\n\n' %
-                     (self._size[0], self._size[1], self._size[2]))
+                     (self.size[0], self.size[1], self.size[2]))
         am_out.write('Parameters {\n')
         am_out.write('    Colormap "redblue.icol",\n')
         am_out.write('    Expression "(b)",\n')
         am_out.write('    Content "%dx%dx%d ushort, uniform coordinates",\n' % (
-            self._size[0], self._size[1], self._size[2]))
+            self.size[0], self.size[1], self.size[2]))
         am_out.write('    SaveInfo "AmiraMesh ZIP",\n')
         am_out.write('    BoundingBox %f %f %f %f %f %f,\n' % (
             self._x_min, self._x_max, self._y_min, self._y_max, self._z_min, self._z_max))
@@ -83,9 +90,54 @@ class NeuronRaw:
         am_out.write('@1\n')
 
         # output intensity
-        for z in range(self._size[2]):
-            for y in range(self._size[1]):
-                for x in range(self._size[0]):
+        for z in range(self.size[2]):
+            for y in range(self.size[1]):
+                for x in range(self.size[0]):
                     am_out.write('%d \n' % (self.intensity[x][y][z]))
 
         am_out.close()
+
+    def block(self, start_point,
+                    size=(16, 16, 16)):
+        rtn = NeuronRaw()
+
+        # calculate info
+        rtn.valid = self.valid
+        rtn.size = list(size)
+        rtn._x_min = self._x_min + start_point[0]
+        rtn._x_max = rtn._x_min + size[0]
+
+        rtn._y_min = self._y_min + start_point[1]
+        rtn._y_max = rtn._y_min + size[1]
+
+        rtn._z_min = self._z_min + start_point[2]
+        rtn._z_max = rtn._z_min + size[2]
+
+        # copy intensity
+        rtn.intensity = np.ndarray(shape=size, dtype=np.uint16)
+        for x in range(start_point[0], start_point[0]+size[0]):
+            for y in range(start_point[1], start_point[1]+size[1]):
+                for z in range(start_point[2], start_point[2]+size[2]):
+                    # coordinate for rtn
+                    x_rtn = x - start_point[0]
+                    y_rtn = y - start_point[1]
+                    z_rtn = z - start_point[2]
+
+                    # zero padding
+                    if x < 0 or x >= self.size[0] or\
+                        y < 0 or y >= self.size[1] or\
+                        z < 0 or z >= self.size[2]:
+                        rtn.intensity[x_rtn][y_rtn][z_rtn] = 0
+                    else:
+                        rtn.intensity[x_rtn][y_rtn][z_rtn] = self.intensity[x][y][z]
+
+        return rtn
+
+    def is_empty(self):
+
+        for x in range(self.size[0]):
+            for y in range(self.size[1]):
+                for z in range(self.size[2]):
+                    if self.intensity[x][y][z] != 0:
+                        return False
+        return True
