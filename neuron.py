@@ -1,10 +1,11 @@
 import numpy as np
+import copy
 
 
 class NeuronRaw:
 
     def __init__(self, address_am=None):
-        self.intensity = np.ndarray(shape=(0), dtype=np.uint16)
+        self.intensity = np.ndarray(shape=(0), dtype=np.float)
         self.valid = False
         self.size = [0, 0, 0]
         self._x_min = 0
@@ -56,14 +57,14 @@ class NeuronRaw:
         self.intensity = np.ndarray(shape=(self.size[0],
                                             self.size[1],
                                             self.size[2]),
-                                     dtype=np.uint16)
+                                     dtype=np.float)
 
         # read intensity
         for z in range(self.size[2]):
             for y in range(self.size[1]):
                 for x in range(self.size[0]):
-                    self.intensity[x][y][z] = np.uint16(
-                        int(in_am.readline()))
+                    self.intensity[x][y][z] = np.float(
+                        float(in_am.readline()) / 65535.0)
 
         in_am.close()
         return True
@@ -93,7 +94,7 @@ class NeuronRaw:
         for z in range(self.size[2]):
             for y in range(self.size[1]):
                 for x in range(self.size[0]):
-                    am_out.write('%d \n' % (self.intensity[x][y][z]))
+                    am_out.write('%d \n' % int(self.intensity[x][y][z]*65535.0))
 
         am_out.close()
 
@@ -114,7 +115,7 @@ class NeuronRaw:
         rtn._z_max = rtn._z_min + size[2]
 
         # copy intensity
-        rtn.intensity = np.ndarray(shape=size, dtype=np.uint16)
+        rtn.intensity = np.ndarray(shape=size, dtype=np.float)
         for x in range(start_point[0], start_point[0]+size[0]):
             for y in range(start_point[1], start_point[1]+size[1]):
                 for z in range(start_point[2], start_point[2]+size[2]):
@@ -127,17 +128,39 @@ class NeuronRaw:
                     if x < 0 or x >= self.size[0] or\
                         y < 0 or y >= self.size[1] or\
                         z < 0 or z >= self.size[2]:
-                        rtn.intensity[x_rtn][y_rtn][z_rtn] = 0
+                        rtn.intensity[x_rtn][y_rtn][z_rtn] = 0.0
                     else:
                         rtn.intensity[x_rtn][y_rtn][z_rtn] = self.intensity[x][y][z]
 
         return rtn
 
-    def is_empty(self):
+    def is_empty(self, threshold = 0.000001):
 
         for x in range(self.size[0]):
             for y in range(self.size[1]):
                 for z in range(self.size[2]):
-                    if self.intensity[x][y][z] != 0:
+                    if self.intensity[x][y][z] >= threshold:
                         return False
         return True
+
+    def is_in_the_center(self, point):
+        point_shift = [0, 0, 0]
+        point_shift[0] = point[0] - self._x_min
+        point_shift[1] = point[1] - self._y_min
+        point_shift[2] = point[2] - self._z_min
+
+        for i in range(3):
+            if point_shift[i] < self.size[i] * 0.25 or point_shift[i] >= self.size[i] * 0.75:
+                return False
+
+        return True
+
+    def normalize(self):
+        rtn = copy.deepcopy(self)
+        # find maximum of intensity
+        maximum = np.max(rtn.intensity)
+        rtn.intensity = rtn.intensity / maximum * 2.0 - 1.0
+        return rtn
+
+    def __getitem__(self, index):
+        return self.intensity[index]
