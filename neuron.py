@@ -143,7 +143,7 @@ class NeuronRaw:
                         return False
         return True
 
-    def is_in_the_center(self, point):
+    def point_in_the_center(self, point):
         point_shift = [0, 0, 0]
         point_shift[0] = point[0] - self._x_min
         point_shift[1] = point[1] - self._y_min
@@ -155,11 +155,42 @@ class NeuronRaw:
 
         return True
 
-    def normalize(self):
+    def points_in_the_center(self, points):
+        for point in points:
+            if self.point_in_the_center(point):
+                return True
+        return False
+
+    def normalize(self, rg=[0, 1]):
         rtn = copy.deepcopy(self)
         # find maximum of intensity
         maximum = np.max(rtn.intensity)
-        rtn.intensity = rtn.intensity / maximum * 2.0 - 1.0
+        rtn.intensity = rtn.intensity / maximum * (rg[1] - rg[0]) + rg[0]
+        return rtn
+
+    def mirror(self, m=[0, 0, 0]):
+        rtn = copy.deepcopy(self)
+        for i, yes_mirror_plz in enumerate(m):
+            if yes_mirror_plz:
+                rtn.intensity = np.flip( rtn.intensity, i )
+        return rtn
+
+    def mirror_x(self):
+        rtn = copy.deepcopy(self)
+        rtn.intensity = np.flip(rtn.intensity, 0);
+
+        return rtn
+
+    def mirror_y(self):
+        rtn = copy.deepcopy(self)
+        rtn.intensity = np.flip(rtn.intensity, 1);
+
+        return rtn
+
+    def mirror_z(self):
+        rtn = copy.deepcopy(self)
+        rtn.intensity = np.flip(rtn.intensity, 2);
+
         return rtn
 
     def __getitem__(self, index):
