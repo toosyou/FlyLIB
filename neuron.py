@@ -1,6 +1,6 @@
 import numpy as np
 import copy
-
+from scipy import ndimage
 
 class NeuronRaw:
 
@@ -166,6 +166,31 @@ class NeuronRaw:
         # find maximum of intensity
         maximum = np.max(rtn.intensity)
         rtn.intensity = rtn.intensity / maximum * (rg[1] - rg[0]) + rg[0]
+        return rtn
+
+    def resize(self, size):
+        if len(size) != 3:
+            raise ValueError('Dimention of size must be 3')
+
+        rtn = copy.deepcopy(self)
+        magnify_ratio = [0, 0, 0]
+        for i in range(3):
+            magnify_ratio[i] = size[i] / rtn.size[i]
+        # new size
+        rtn.size = size
+        # zoom x
+        rtn._x_min = rtn._x_min * magnify_ratio[0]
+        rtn._x_max = rtn._x_max * magnify_ratio[0]
+        # zoom y
+        rtn._y_min = rtn._y_min * magnify_ratio[1]
+        rtn._y_max = rtn._y_max * magnify_ratio[1]
+        # zoom z
+        rtn._z_min = rtn._z_min * magnify_ratio[2]
+        rtn._z_max = rtn._z_max * magnify_ratio[2]
+
+        # zoom intensity with bilinear interpolation
+        rtn.intensity = ndimage.zoom(rtn.intensity, magnify_ratio, order=1)
+
         return rtn
 
     def mirror(self, m=[0, 0, 0]):
