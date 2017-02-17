@@ -4,7 +4,7 @@ from scipy import ndimage
 
 class NeuronRaw:
 
-    def __init__(self, address_am=None):
+    def __init__(self, address_am=None, intensity=None):
         self.intensity = np.ndarray(shape=(0), dtype=np.float)
         self.valid = False
         self.size = [0, 0, 0]
@@ -16,6 +16,59 @@ class NeuronRaw:
         self._z_max = 0
         if address_am:
             self.valid = self.read_from_am(address_am)
+        elif intensity:
+            self.read_from_intensity(intensity)
+        return
+
+    # size must be setted beforehand
+    def read_from_points(self, points, exaggerate=False):
+        # check if size contains any zero
+        for i in self.size:
+            if i == 0:
+                raise ValueError('Neuron must be allocated beforehand.')
+
+        for point in points:
+            # round to nestest integer
+            coordinate = np.rint(np.array(point) - np.array([self._x_min, self._y_min, self._z_min]) )
+            coordinate = coordinate.astype(int)
+            # check boundary
+            for i, coor in enumerate(coordinate):
+                if coor >= self.size[i]:
+                    coordinate[i] = self.size[i]-1
+                elif coor < 0:
+                    coordinate[i] = 0
+            if exaggerate:
+                for i in range(3):
+                    for j in range(3):
+                        for k in range(3):
+                            new_coor = coordinate + np.array([i-1, j-1, k-1])
+                            # check boundary
+                            for m, coor in enumerate(new_coor):
+                                if coor >= self.size[m]:
+                                    new_coor[m] = self.size[m]-1
+                                elif coor < 0:
+                                    new_coor[m] = 0
+                            self.intensity[new_coor[0]][new_coor[1]][new_coor[2]] = 1.0
+            else:
+                self.intensity[coordinate[0]][coordinate[1]][coordinate[2]] = 1.0
+
+        return
+
+    def clear_intensity(self):
+        self.intensity = np.zeros(self.intensity.shape)
+        return
+
+    def read_from_intensity(self, intensity, x_min=0, y_min=0, z_min=0):
+        self.size = list(intensity.shape)
+        self.intensity = copy.deepcopy(intensity)
+        self.valid = True
+        self._x_min = x_min
+        self._x_max = x_min + self.size[0]
+        self._y_min = y_min
+        self._y_max = y_min + self.size[1]
+        self._z_min = z_min
+        self._z_max = z_min + self.size[2]
+        return
 
     def read_from_am(self, address_am):
         # open the file
@@ -177,7 +230,7 @@ class NeuronRaw:
         for i in range(3):
             magnify_ratio[i] = size[i] / rtn.size[i]
         # new size
-        rtn.size = size
+        rtn.size = list(size)
         # zoom x
         rtn._x_min = rtn._x_min * magnify_ratio[0]
         rtn._x_max = rtn._x_max * magnify_ratio[0]
