@@ -221,16 +221,21 @@ class NeuronRaw:
         rtn.intensity = rtn.intensity / maximum * (rg[1] - rg[0]) + rg[0]
         return rtn
 
-    def resize(self, size):
+    def resize(self, size, copy=False):
         if len(size) != 3:
             raise ValueError('Dimention of size must be 3')
 
-        rtn = copy.deepcopy(self)
+        if copy:
+            rtn = copy.deepcopy(self)
+        else:
+            rtn = self
         magnify_ratio = [0, 0, 0]
         for i in range(3):
-            magnify_ratio[i] = size[i] / rtn.size[i]
-        # new size
-        rtn.size = list(size)
+            if size[i] == -1:
+                magnify_ratio[i] = 1.0
+            else:
+                magnify_ratio[i] = size[i] / rtn.size[i]
+
         # zoom x
         rtn._x_min = rtn._x_min * magnify_ratio[0]
         rtn._x_max = rtn._x_max * magnify_ratio[0]
@@ -243,6 +248,9 @@ class NeuronRaw:
 
         # zoom intensity with bilinear interpolation
         rtn.intensity = ndimage.zoom(rtn.intensity, magnify_ratio, order=1)
+
+        # new size
+        rtn.size = list(rtn.intensity.shape)
 
         return rtn
 
@@ -270,6 +278,9 @@ class NeuronRaw:
         rtn.intensity = np.flip(rtn.intensity, 2);
 
         return rtn
+
+    def copy(self):
+        return copy.deepcopy(self)
 
     def __getitem__(self, index):
         return self.intensity[index]
