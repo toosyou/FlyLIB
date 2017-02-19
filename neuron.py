@@ -247,7 +247,7 @@ class NeuronRaw:
         rtn._z_max = rtn._z_max * magnify_ratio[2]
 
         # zoom intensity with bilinear interpolation
-        rtn.intensity = ndimage.zoom(rtn.intensity, magnify_ratio, order=1)
+        rtn.intensity = ndimage.zoom(rtn.intensity, magnify_ratio, order=0)
 
         # new size
         rtn.size = list(rtn.intensity.shape)
