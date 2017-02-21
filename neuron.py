@@ -54,7 +54,7 @@ class NeuronRaw:
 
         return
 
-    def clear_intensity(self):
+    def clean_intensity(self):
         self.intensity = np.zeros(self.intensity.shape)
         return
 
