@@ -221,7 +221,7 @@ class NeuronRaw:
         rtn.intensity = rtn.intensity / maximum * (rg[1] - rg[0]) + rg[0]
         return rtn
 
-    def resize(self, size, copy=False):
+    def resize(self, size, copy=False, order=0):
         if len(size) != 3:
             raise ValueError('Dimention of size must be 3')
 
@@ -247,7 +247,7 @@ class NeuronRaw:
         rtn._z_max = rtn._z_max * magnify_ratio[2]
 
         # zoom intensity with bilinear interpolation
-        rtn.intensity = ndimage.zoom(rtn.intensity, magnify_ratio, order=0)
+        rtn.intensity = ndimage.zoom(rtn.intensity, magnify_ratio, order=order)
 
         # new size
         rtn.size = list(rtn.intensity.shape)
