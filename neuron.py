@@ -221,6 +221,12 @@ class NeuronRaw:
         rtn.intensity = rtn.intensity / maximum * (rg[1] - rg[0]) + rg[0]
         return rtn
 
+    def binarize(self, keep_threshold_percentage=0.8):
+        maximum = np.amax(self.intensity)
+        threshold = maximum * keep_threshold_percentage
+        self.intensity = 0.0 + (self.intensity > threshold) * 1
+        return None
+
     def resize(self, size, copy=False, order=0):
         if len(size) != 3:
             raise ValueError('Dimention of size must be 3')
