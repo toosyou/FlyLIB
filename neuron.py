@@ -151,8 +151,7 @@ class NeuronRaw:
 
         am_out.close()
 
-    def block(self, start_point,
-                    size=(16, 16, 16)):
+    def block(self, start_point, size=(16, 16, 16)):
         rtn = NeuronRaw()
 
         # calculate info
