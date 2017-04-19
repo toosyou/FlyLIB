@@ -195,29 +195,39 @@ class NeuronRaw:
                         return False
         return True
 
-    def point_in_the_center(self, point):
+    def point_in_the_center(self, point, percentage=0.5):
         point_shift = [0, 0, 0]
         point_shift[0] = point[0] - self._x_min
         point_shift[1] = point[1] - self._y_min
         point_shift[2] = point[2] - self._z_min
 
         for i in range(3):
-            if point_shift[i] < self.size[i] * 0.25 or point_shift[i] >= self.size[i] * 0.75:
+            if point_shift[i] < self.size[i] * ((1.0-percentage)/2.0) or point_shift[i] >= self.size[i] * (1.0 - (1.0-percentage)/2.0):
                 return False
 
         return True
 
-    def points_in_the_center(self, points):
+    def points_in_the_center(self, points, percentage=0.5):
         for point in points:
-            if self.point_in_the_center(point):
+            if self.point_in_the_center(point, percentage):
                 return True
         return False
 
-    def normalize(self, rg=[0, 1]):
+    def normalize(self, rg=[0, 1], ignore_zero=False):
         rtn = copy.deepcopy(self)
         # find maximum of intensity
         maximum = np.max(rtn.intensity)
-        rtn.intensity = rtn.intensity / maximum * (rg[1] - rg[0]) + rg[0]
+        if ignore_zero:
+            minimum = np.min(rtn.intensity[np.nonzero(rtn.intensity)])
+            for x in range(rtn.size[0]):
+                for y in range(rtn.size[1]):
+                    for z in range(rtn.size[2]):
+                        if rtn.intensity[x][y][z] == 0:
+                            continue
+                        rtn.intensity[x][y][z] = (rtn.intensity[x][y][z] - minimum) / (maximum - minimum) * (rg[1] - rg[0]) + rg[0]
+        else:
+            minimum = np.min(rtn.intensity)
+            rtn.intensity = (rtn.intensity - minimum) / (maximum - minimum) * (rg[1] - rg[0]) + rg[0]
         return rtn
 
     def binarize(self, keep_threshold_percentage=0.8):
