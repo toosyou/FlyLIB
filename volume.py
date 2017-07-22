@@ -230,10 +230,13 @@ class Volume:
             rtn.intensity = (rtn.intensity - minimum) / (maximum - minimum) * (rg[1] - rg[0]) + rg[0]
         return rtn
 
-    def binarize(self, keep_threshold_percentage=0.8):
-        maximum = np.amax(self.intensity)
-        threshold = maximum * keep_threshold_percentage
-        self.intensity = 0.0 + (self.intensity > threshold) * 1
+    def binarize(self, threshold=None, keep_threshold_percentage=0.8):
+        if threshold:
+            self.intensity = 0.0 + (self.intensity > threshold) * 1
+        else:
+            maximum = np.amax(self.intensity)
+            threshold = maximum * keep_threshold_percentage
+            self.intensity = 0.0 + (self.intensity > threshold) * 1
         return None
 
     def resize(self, size, copy=False, order=0):
