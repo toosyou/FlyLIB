@@ -4,7 +4,7 @@ from scipy import ndimage
 
 class Volume:
 
-    def __init__(self, address_am=None, intensity=None):
+    def __init__(self):
         self.intensity = np.ndarray(shape=(0), dtype=np.float)
         self.valid = False
         self.size = [0, 0, 0]
@@ -14,10 +14,6 @@ class Volume:
         self._y_max = 0
         self._z_min = 0
         self._z_max = 0
-        if address_am:
-            self.valid = self.read_from_am(address_am)
-        elif intensity:
-            self.read_from_intensity(intensity)
         return
 
     # size must be setted beforehand
